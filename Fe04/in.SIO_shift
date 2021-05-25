@@ -1,0 +1,31 @@
+atom_style      atomic
+units           metal
+boundary        p p p
+
+variable        a0 equal 2.835
+variable        Ln equal 5
+variable        Na equal ${Ln}*${Ln}*${Ln}*2
+variable        e0 equal 4.36064717707268
+
+lattice         bcc ${a0}
+region          region1 block 0 ${Ln} 0 ${Ln} 0 ${Ln} units lattice
+create_box      1 region1
+
+variable        z0 equal ${a0}*${dd}
+create_atoms    1 box
+create_atoms    1 single 0 0 ${z0} units box
+
+pair_style      aenet/zbl 1.0 2.05 10.0 -4475.52435072301
+pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe
+mass            1 55.845
+
+dump            d2 all cfg 1000 *.cfg mass type xs ys zs fx fy fz
+dump_modify     d2 element Fe
+
+run 0
+
+variable        Ef equal pe+${e0}*(${Na}+1)
+variable        E equal pe
+variable        F equal ${Ef}
+variable        A equal ${dd}
+print "$A $F" append SIO_shift.dat

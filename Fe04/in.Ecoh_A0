@@ -1,0 +1,23 @@
+atom_style      atomic
+units           metal
+boundary        p p p
+
+lattice         bcc 2.9
+region          region1 block 0 1 0 1 0 1 units lattice
+create_box      1 region1
+
+create_atoms    1 box
+
+pair_style      aenet/zbl 1.0 2.0 10.0 -4475.52435072301
+pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe
+mass            1 55.845
+
+thermo_style    custom step etotal temp lx vol press pxx pyy pxy
+thermo          10
+
+fix             f1 all box/relax iso 0.0
+
+minimize        1.0e-20 0.0 500 10000
+variable        E equal pe/2
+variable        A equal lx
+print "Ecoh= $E A0= $A" file Ecoh_A0.dat

@@ -1,0 +1,32 @@
+atom_style      atomic
+units           metal
+boundary        p p p
+
+variable        a0 equal 2.835
+variable        Ln equal 5
+variable        Na equal ${Ln}*${Ln}*${Ln}*2
+variable        e0 equal 4.36064717707268
+
+lattice         bcc ${a0}
+region          region1 block 0 ${Ln} 0 ${Ln} 0 ${Ln} units lattice
+create_box      1 region1
+
+variable        z0 equal ${a0}*0.5
+create_atoms    1 box
+create_atoms    1 single 0 0 ${z0} units box
+
+pair_style      aenet/zbl 0.8 2.0 10.0 -4475.52435072301 1
+pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe
+mass            1 55.845
+
+dump            d2 all cfg 1000 *.cfg mass type xs ys zs fx fy fz
+dump_modify     d2 element Fe
+
+min_style       cg
+minimize        1.0e-30 5.0e-3 5000 100000
+
+variable        Ef equal pe+${e0}*(${Na}+1)
+variable        E equal pe
+variable        F equal ${Ef}
+variable        A equal 0.5
+print "Ef_SIO = $F" file Ef_SIO.dat
