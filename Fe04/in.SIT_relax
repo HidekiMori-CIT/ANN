@@ -16,7 +16,7 @@ variable        x0 equal ${a0}*0.25
 create_atoms    1 box
 create_atoms    1 single ${x0} 0 ${z0} units box
 
-pair_style      aenet/zbl 0.8 2.0 10.0 -4475.52435072301 1
+pair_style      aenet/zbl 0.8 2.0 10.0 -4475.52435072301
 pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe
 mass            1 55.845
 
