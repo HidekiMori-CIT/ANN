@@ -6,22 +6,24 @@ variable        a0 equal 2.835
 variable        Ln equal 5
 variable        Na equal ${Ln}*${Ln}*${Ln}*2
 variable        e0 equal 4.36064717707268
-variable        dd equal 0.025
-variable        Nd equal 16
-variable        z0 equal 0.5*${a0}
-variable        dz equal ${dd}*${a0}
+variable        dd equal 0.05
+variable        Nd equal 105
+variable        z0 equal 5.5
+variable        dz equal ${dd}
 
 lattice         bcc ${a0}
 region          region1 block 0 ${Ln} 0 ${Ln} 0 ${Ln} units lattice
 create_box      2 region1
 
-create_atoms    1 box
+create_atoms    1 single 0 0 0 units box
 create_atoms    2 single 0 0 ${z0} units box
 
 group move_atom type 2
 
-pair_style      aenet/zbl 1.0 2.0 10.0 -4475.52435072301
-pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe Fe
+#pair_style      aenet/zbl 1.0 1.5 10.0 -4475.52435072301
+#pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe Fe
+pair_style      aenet
+pair_coeff      * * v03 Fe 10sw-10sw.nn Fe Fe
 mass            * 55.845
 
 dump            d1 all cfg 1000 *.cfg mass type xs ys zs
@@ -29,10 +31,10 @@ dump_modify     d1 element Fe Fe
 
 run 0
 
-variable        F equal pe+${e0}*(${Na}+1)
-variable        A equal ${z0}/${a0}
-print "#dr(unit a0) Ef(unit eV)" file SIO_shift.dat
-print "$A $F" append SIO_shift.dat
+print "#dr(unit a0) Ef(unit eV)" file Dimer_shift.dat
+variable        F equal pe+2*4475.52435072301
+variable        A equal ${z0}
+print "$A $F" append Dimer_shift.dat
 
 label       loop
 variable    a uloop ${Nd}
@@ -46,11 +48,12 @@ run 0
 
 #undump d2
 
-variable        F equal pe+${e0}*(${Na}+1)
-variable        D equal (${z0}-${dz}*${a})/${a0}
-print "$D $F" append SIO_shift.dat
+#variable        F equal pe
+variable        F equal pe+2*4475.52435072301
+variable        D equal (${z0}-${dz}*${a})
+print "$D $F" append Dimer_shift.dat
 
 next        a
-jump        in.SIO_shift loop
+jump        in.dimer_shift loop
 label       break
 variable    a delete
