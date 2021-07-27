@@ -1,0 +1,66 @@
+atom_style      atomic
+units           metal
+boundary        p p p
+
+variable        a0 equal 2.835
+variable        Ln equal 5
+variable        Na equal ${Ln}*${Ln}*${Ln}*2
+variable        e0 equal 9.25644969661607
+variable        Nd equal 50
+variable        dd0 equal 0.0125
+variable        dd1 equal ${dd0}*1
+variable        dd3 equal ${dd0}*3
+variable        dd5 equal ${dd0}*5
+
+lattice         bcc ${a0}
+region          region1 block 0 ${Ln} 0 ${Ln} 0 ${Ln} units lattice
+create_box      2 region1
+
+create_atoms    1 box
+#---------------------------------------------------------------
+variable r2 equal sqrt(${a0}^2+${a0}^2+${a0}^2)/4
+#r2 is the radius of the copper atom
+
+#region select is a region defined so that all atoms within this region are removed
+region select sphere 0 0 0 ${r2} units box
+delete_atoms region select compress yes
+#---------------------------------------------------------------------
+
+create_atoms    2 single 0 0 0 units box
+
+group move_atom type 2
+
+pair_style      aenet/zbl 0.7 1.5 10.0 -4470.62867981871
+pair_coeff      * * v03 Fe 26.0 10sw-10sw.nn Fe Fe
+mass            * 55.845
+
+dump            d1 all cfg 1000 *.cfg mass type xs ys zs
+dump_modify     d1 element Fe Fe
+
+run 0
+
+variable        F equal pe+${e0}*${Na}
+variable        D equal 0.0
+print "#dr(unit a0) Ef(unit eV)" file BCC_shift_135.dat
+print "$D $F" append BCC_shift_135.dat
+
+label       loop
+variable    a uloop ${Nd}
+
+displace_atoms  move_atom move -${dd1} -${dd3} -${dd5} units box
+
+#dump            d2 all cfg 1000 shift.*.${a}.cfg mass type xs ys zs
+#dump_modify     d2 element Fe Fe
+
+run 0
+
+#undump d2
+
+variable        F equal pe+${e0}*${Na}
+variable        D equal sqrt(${dd1}*${dd1}+${dd3}*${dd3}+${dd5}*${dd5})*${a}
+print "$D $F" append BCC_shift_135.dat
+
+next        a
+jump        in.BCC_shift_135 loop
+label       break
+variable    a delete
